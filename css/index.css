@@ -1,0 +1,92 @@
+body {
+  height: 100vh;
+  position: relative;
+  background-color: #000;
+}
+
+.flex-container {
+  position: absolute;
+  width: 180px;
+  margin: auto;
+  display: flex;
+  background-color: rgb(239, 239, 239);
+  flex-direction: column;
+  padding: 2px 0;
+  border: 1px solid #000;
+  left: 0;
+  right: 0;
+  top: 20%;
+}
+
+.row {
+  height: 45px;
+  padding: 1px 2px;
+  font-size: 0;
+}
+
+#input {
+  display: block;
+  height: 100%;
+  box-sizing: border-box;
+  width: 100%;
+  outline: none;
+  font-size: 1.5rem;
+  border: 2px solid rgb(118, 118, 118);
+}
+
+button {
+  height: 100%;
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+  box-sizing: border-box;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#reset {
+  width: 75%;
+}
+
+#division {
+  width: 25%;
+}
+
+.number,
+#multiply,
+#plus,
+#subtract,
+#decimal-point {
+  width: 25%;
+}
+
+#result {
+  width: 50%;
+}
+
+#reset {
+  background-color: red;
+}
+
+#division,
+#multiply,
+#plus,
+#subtract,
+#result {
+  background-color: orange;
+}
+
+.number {
+  background-color: white;
+}
+
+.number:active {
+  background-color: antiquewhite;
+}
+.number:hover {
+  background-color: antiquewhite;
+}
+
+#decimal-point {
+  background-color: green;
+}
