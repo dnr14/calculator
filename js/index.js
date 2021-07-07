@@ -13,6 +13,8 @@ class Calculator {
     this.numberArray = [];
     this.arithmeticOperationArray = [];
 
+    this.decimalPointTrigger = false;
+
     this.NUMVERS = {
       _0: this.$numberEls[9],
       _1: this.$numberEls[0],
@@ -105,15 +107,28 @@ class Calculator {
 
   decimalPointEvent = () => {
     const { value } = this.$inputEl;
-    if (value.indexOf(".") === -1)
-      this.$inputEl.value = `${value}.`;
+    if (value.length !== 0) {
+      let lastStr = [...value].pop();
+
+      if (lastStr === "+" || lastStr === "-" || lastStr === "x" || lastStr === "÷")
+        return;
+
+      if (this.decimalPointTrigger === false || value.indexOf(".") === -1) {
+        this.$inputEl.value += `.`;
+        this.decimalPointTrigger = true;
+      }
+    }
   }
 
   backspaceEvent = () => {
-    if (this.$inputEl.value.length !== 1) {
-      let str = [...this.$inputEl.value];
-      str.pop();
-      this.$inputEl.value = str.reduce((l, r) => l += r);
+    const { value } = this.$inputEl;
+    if (value.length !== 0) {
+      let lastStr = [...value].pop();
+
+      if (lastStr === ".")
+        this.decimalPointTrigger = false;
+
+      this.$inputEl.value = value.slice(0, value.length - 1);
     }
   }
 
@@ -125,42 +140,28 @@ class Calculator {
       ? target = e.target
       : target = e;
 
-    const value = target.dataset.set;
+    const inputNumber = Number(target.dataset.type);
+    const { value } = this.$inputEl;
 
-    if (this.$inputEl.value === "" || this.$inputEl.value === "0") {
-      if (Number(value) === 0) {
-        this.$inputEl.value = value;
+    if (value === "" || value === "0") {
+      if (inputNumber === 0) {
+        this.$inputEl.value = inputNumber;
         return;
       }
     }
 
-    if (this.$inputEl.value === "0") {
+    if (value === "0") {
       this.$inputEl.value = "";
-      this.$inputEl.value += value;
+      this.$inputEl.value += inputNumber;
     } else {
-      let validation = Number(this.$inputEl.value + value);
-
-      // 갓다와서 부동소수점 해결
-      //정수
-      if (Number.isInteger(validation)) {
-        if (this.maxValidation(Number(this.$inputEl.value + value))) {
-          this.$inputEl.value += value;
-        } else {
-          alert(`유효한 계산 범위를 초과하였습니다.`);
-        }
-        //소수
-      } else {
-        this.$inputEl.value += value;
-      }
+      this.$inputEl.value += inputNumber;
     }
 
     this.activeEvent(target);
   }
 
   resetEvent = () => {
-    this.$inputEl.value = "0";
-    this.numberArray = [];
-    this.arithmeticOperationArray = [];
+    this.$inputEl.value = "";
   }
 
   calculateEvent = (e) => {
@@ -170,60 +171,62 @@ class Calculator {
       ? target = e.target
       : target = e;
 
-    // if (!this.maxValidation(Number(this.$inputEl.value) + 1)) {
-    //   alert(`유효한 계산 범위를 초과하였습니다.`);
-    //   return;
-    // }
-    // if (!this.maxValidation(Number(this.$inputEl.value) * 2)) {
-    //   alert(`유효한 계산 범위를 초과하였습니다.`);
-    //   return;
-    // }
+    let value = target.dataset.type;
 
-    let value = target.dataset.set;
-    this.numberArray.push(Number(this.$inputEl.value));
-    this.arithmeticOperationArray.push(value);
-    this.$inputEl.value = "0";
+    if (this.$inputEl.value === "") {
+      if (value === "x" || value === "÷") {
+        return;
+      }
+    }
+
+    let lastStr = [...this.$inputEl.value].pop();
+
+    if (lastStr === "+" || lastStr === "-" || lastStr === "x" || lastStr === "÷") {
+      return;
+    }
+
+    this.decimalPointTrigger = false;
+    this.$inputEl.value += value;
   }
 
   resultEvent = () => {
 
-    if (this.numberArray.length !== 0) {
+    let inputValue = this.$inputEl.value.trim();
 
-      let result = Number(this.numberArray[0]);
-      let value = Number(this.$inputEl.value);
-      if (value !== 0) {
-        this.numberArray.push(value);
+    while (1) {
+      if (inputValue.indexOf("x") === -1) break;
+      inputValue = inputValue.replace("x", "*");
+    }
+
+    while (1) {
+      if (inputValue.indexOf("÷") === -1) break;
+      inputValue = inputValue.replace("÷", "/");
+    }
+
+
+    try {
+      if (inputValue === "") throw new Error();
+      let result = eval(inputValue);
+
+      if (result === Infinity)
+        throw new Error();
+
+      if (Number.isInteger(result)) {
+        if (!Number.isSafeInteger(result)) {
+          alert("유효한 범위를 넘어버렸습니다.");
+          return;
+        } else {
+          this.$inputEl.value = result;
+        }
+      } else if (Number.isFinite(result)) {
+        this.$inputEl.value = result.toFixed(10);
       }
 
-      this.numberArray.forEach((number, idx) => {
-        if (idx === 0) return;
-        const arithmeticOperation = this.arithmeticOperationArray[idx - 1];
-        number = Number(number);
-
-        switch (arithmeticOperation) {
-          case "+":
-            result = result + number;
-            break;
-          case "*":
-            result = result * number;
-            break;
-          case "/":
-            if (number === 0)
-              number = 1;
-            result = result / number;
-            break;
-          case "-":
-            result = result - number;
-            break;
-        }
-      });
-
-      this.$inputEl.value = result;
-      this.numberArray = [];
-      this.arithmeticOperationArray = [];
-    } else {
-      alert("결과가 없습니다.");
+    } catch (error) {
+      this.$inputEl.value = "";
+      alert("올바른 계산식이 아닙니다.");
     }
+
   }
 
   activeEvent(el) {
@@ -231,22 +234,6 @@ class Calculator {
     setTimeout(() => {
       el.removeAttribute('style');
     }, 100);
-  }
-
-  maxValidation(value) {
-    if (Number.isSafeInteger(value)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  minValidation(value) {
-    if (Number.MIN_SAFE_INTEGER) {
-      return true;
-    } else {
-      return false;
-    }
   }
 
 }
