@@ -1,5 +1,4 @@
 class Calculator {
-
   constructor() {
     this.$numberEls = document.querySelectorAll(".number");
     this.$resetEl = document.getElementById("reset");
@@ -25,8 +24,8 @@ class Calculator {
       _6: this.$numberEls[5],
       _7: this.$numberEls[6],
       _8: this.$numberEls[7],
-      _9: this.$numberEls[8]
-    }
+      _9: this.$numberEls[8],
+    };
 
     this.init();
   }
@@ -35,15 +34,17 @@ class Calculator {
   }
 
   eventHandler() {
-    this.$numberEls.forEach(el => el.addEventListener('click', this.numbersEvent));
-    this.$resetEl.addEventListener('click', this.resetEvent);
-    this.$resultEl.addEventListener('click', this.resultEvent);
-    this.$plusEl.addEventListener('click', this.calculateEvent);
-    this.$multiplyEl.addEventListener('click', this.calculateEvent);
-    this.$divisionEl.addEventListener('click', this.calculateEvent);
-    this.$subtractEl.addEventListener('click', this.calculateEvent);
-    this.$decimalPointEl.addEventListener('click', this.decimalPointEvent);
-    window.addEventListener('keydown', this.keyEvent);
+    this.$numberEls.forEach((el) =>
+      el.addEventListener("click", this.numbersEvent)
+    );
+    this.$resetEl.addEventListener("click", this.resetEvent);
+    this.$resultEl.addEventListener("click", this.resultEvent);
+    this.$plusEl.addEventListener("click", this.calculateEvent);
+    this.$multiplyEl.addEventListener("click", this.calculateEvent);
+    this.$divisionEl.addEventListener("click", this.calculateEvent);
+    this.$subtractEl.addEventListener("click", this.calculateEvent);
+    this.$decimalPointEl.addEventListener("click", this.decimalPointEvent);
+    window.addEventListener("keydown", this.keyEvent);
   }
 
   keyEvent = (e) => {
@@ -101,16 +102,20 @@ class Calculator {
       case 105:
         this.numbersEvent(this.NUMVERS._9);
         break;
-
     }
-  }
+  };
 
   decimalPointEvent = () => {
     const { value } = this.$inputEl;
     if (value.length !== 0) {
       let lastStr = [...value].pop();
 
-      if (lastStr === "+" || lastStr === "-" || lastStr === "x" || lastStr === "÷")
+      if (
+        lastStr === "+" ||
+        lastStr === "-" ||
+        lastStr === "x" ||
+        lastStr === "÷"
+      )
         return;
 
       if (this.decimalPointTrigger === false || value.indexOf(".") === -1) {
@@ -118,27 +123,23 @@ class Calculator {
         this.decimalPointTrigger = true;
       }
     }
-  }
+  };
 
   backspaceEvent = () => {
     const { value } = this.$inputEl;
     if (value.length !== 0) {
       let lastStr = [...value].pop();
 
-      if (lastStr === ".")
-        this.decimalPointTrigger = false;
+      if (lastStr === ".") this.decimalPointTrigger = false;
 
       this.$inputEl.value = value.slice(0, value.length - 1);
     }
-  }
+  };
 
   numbersEvent = (e) => {
-
     let target = null;
 
-    e instanceof MouseEvent
-      ? target = e.target
-      : target = e;
+    e instanceof MouseEvent ? (target = e.target) : (target = e);
 
     const inputNumber = Number(target.dataset.type);
     const { value } = this.$inputEl;
@@ -158,18 +159,16 @@ class Calculator {
     }
 
     this.activeEvent(target);
-  }
+  };
 
   resetEvent = () => {
     this.$inputEl.value = "";
-  }
+  };
 
   calculateEvent = (e) => {
     let target = null;
 
-    e instanceof MouseEvent
-      ? target = e.target
-      : target = e;
+    e instanceof MouseEvent ? (target = e.target) : (target = e);
 
     let value = target.dataset.type;
 
@@ -181,16 +180,20 @@ class Calculator {
 
     let lastStr = [...this.$inputEl.value].pop();
 
-    if (lastStr === "+" || lastStr === "-" || lastStr === "x" || lastStr === "÷") {
+    if (
+      lastStr === "+" ||
+      lastStr === "-" ||
+      lastStr === "x" ||
+      lastStr === "÷"
+    ) {
       return;
     }
 
     this.decimalPointTrigger = false;
     this.$inputEl.value += value;
-  }
+  };
 
   resultEvent = () => {
-
     let inputValue = this.$inputEl.value.trim();
 
     while (1) {
@@ -203,15 +206,13 @@ class Calculator {
       inputValue = inputValue.replace("÷", "/");
     }
 
-
     try {
       if (inputValue === "") throw new Error();
       let result = eval(inputValue);
-
-      if (result === Infinity)
-        throw new Error();
+      if (result === Infinity) throw new Error();
 
       if (Number.isInteger(result)) {
+        // 자바스크립트는 -(2^53-1) ~ 2^53+1 범위의 정수만 사용할 수 있다.
         if (!Number.isSafeInteger(result)) {
           alert("유효한 범위를 넘어버렸습니다.");
           return;
@@ -219,23 +220,24 @@ class Calculator {
           this.$inputEl.value = result;
         }
       } else if (Number.isFinite(result)) {
+        // 10진수의 소수점을 2진번으로 변환을 하게되면 무한 소수가 나오게된다.
+        // 무한한 소수는 컴퓨터에 저장 할 수없으니 유한 소수까지 짤라서 저장을한다.
+        // 그래서 계산에 오차가 발생한다.
+        // 이것을 방지하기위해 소수점 10자리에서 짜르도록 했습니다.
         this.$inputEl.value = result.toFixed(10);
       }
-
     } catch (error) {
       this.$inputEl.value = "";
       alert("올바른 계산식이 아닙니다.");
     }
-
-  }
+  };
 
   activeEvent(el) {
     el.style.background = `antiquewhite`;
     setTimeout(() => {
-      el.removeAttribute('style');
+      el.removeAttribute("style");
     }, 100);
   }
-
 }
 
 Calculator.prototype.KEYS = {
@@ -245,9 +247,9 @@ Calculator.prototype.KEYS = {
   division: 111,
   enter: 13,
   decimalPoint: 110,
-  backspace: 8
-}
+  backspace: 8,
+};
 
 window.onload = () => {
   new Calculator();
-}
+};
